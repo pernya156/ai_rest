@@ -4,7 +4,7 @@ from django.forms import ValidationError
 
 
 class Article(models.Model):
-    titel = models.CharField(max_length=100, db_index=True)
+    title = models.CharField(max_length=100, db_index=True)
     preview_image = models.ImageField(null=True, blank=True, max_length=255)
     content = models.TextField()
     show_at_index = models.BooleanField(default=False)
@@ -12,15 +12,13 @@ class Article(models.Model):
     created_at = models.DateTimeField("생성일", auto_now_add=True)
     modified_at = models.DateTimeField("수정일", auto_now=True)
 
+    class Meta:
+        verbose_name = "칼럼"
+        verbose_name_plural = "칼럼s"
 
-class Meta:
-    verbose_name = "칼럼"
-    verbose_name_plural = "칼럼s"
+    def __str__(self):
 
-
-def __str__(self):
-
-    return f"{self.id} - {self.title}"
+        return f"{self.id} - {self.title}"
 
 
 class Restaurant(models.Model):
@@ -62,7 +60,7 @@ class Restaurant(models.Model):
     last_order_time = models.TimeField("주문마감시간", null=True, blank=True)
     category = models.ForeignKey(
         "RestaurantCategory",
-        on_Delete=models.SET_NULL,  # 참조된 카테고리 삭제시 null로 설정 (데이터 보존)
+        on_delete=models.SET_NULL,  # 참조된 카테고리 삭제시 null로 설정 (데이터 보존)
         blank=True,
         null=True,
     )
@@ -71,10 +69,10 @@ class Restaurant(models.Model):
         blank=True,
     )  # M:N 관계(다대다)
     region = models.ForeignKey(
-        "restaurant.Region",
+        "Region",
         on_delete=models.SET_NULL,  # 참조된 wldur 삭제시 null로 설정 (데이터 보존)
         null=True,
-        blacnk=True,
+        blank=True,
         db_index=True,
         verbose_name="지역",
         related_name="restaurants",  # 역참조 이름 설정
@@ -152,7 +150,7 @@ class RestaurantMenu(models.Model):
     restaurant = models.ForeignKey(Restaurant, on_delete=models.CASCADE)
     Name = models.CharField("이름", max_length=100)
     price = models.PositiveIntegerField("가격", default=0)
-    image = models.imageField(
+    image = models.ImageField(
         "이미지", upload_to="restaurant-menu", null=True, blank=True
     )  # MEDIA_ROOT/restaurant-menu/이미지파일을 저장
     created_at = models.DateTimeField("생성일", auto_now_add=True, db_index=True)
@@ -189,6 +187,18 @@ class Review(models.Model):
 
     def __str__(self):
         return f"{self.author}:{self.title}"
+
+    # -------------------------------------------------------
+    @property
+    def restaurant_name(self):
+        return self.restaurant.name
+
+    @property
+    def content_partial(self):
+        return self.content[:20]
+
+
+# -------------------------------------------------------
 
 
 class ReviewImage(models.Model):
